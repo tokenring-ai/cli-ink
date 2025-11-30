@@ -18,14 +18,7 @@ export default function AgentSelectionScreen({
   const tree: TreeLeaf = useMemo(() => {
     const configs = Object.entries(agentManager.getAgentConfigs());
     
-    const categories: Record<string, TreeLeaf[]> = {
-      'Interactive': [],
-      'Planning & Management': [],
-      'Development': [],
-      'Engineering': [],
-      'Quality & Operations': [],
-      'Design & Documentation': [],
-    };
+    const categories: Record<string, TreeLeaf[]> = {};
 
     configs.forEach(([type, config]) => {
       const leaf: TreeLeaf = {
@@ -33,19 +26,11 @@ export default function AgentSelectionScreen({
         value: `spawn:${type}`,
       };
 
-      if (config.type === 'interactive') {
-        categories['Interactive'].push(leaf);
-      } else if (['teamLeader', 'productManager', 'productDesignEngineer', 'systemArchitect'].includes(type)) {
-        categories['Planning & Management'].push(leaf);
-      } else if (['fullStackDeveloper', 'frontendDesign', 'backendDesign', 'apiDesigner', 'databaseDesign'].includes(type)) {
-        categories['Development'].push(leaf);
-      } else if (['businessLogicEngineer', 'dataEngineer', 'integrationEngineer', 'authDesign'].includes(type)) {
-        categories['Engineering'].push(leaf);
-      } else if (['testEngineer', 'codeQualityEngineer', 'securityReview', 'performanceEngineer', 'devopsEngineer'].includes(type)) {
-        categories['Quality & Operations'].push(leaf);
-      } else if (['uiUxDesigner', 'documentationEngineer'].includes(type)) {
-        categories['Design & Documentation'].push(leaf);
+      const category = config.category || 'Other';
+      if (!categories[category]) {
+        categories[category] = [];
       }
+      categories[category].push(leaf);
     });
 
     const currentAgents = agentManager.getAgents();
