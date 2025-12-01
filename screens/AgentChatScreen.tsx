@@ -2,6 +2,7 @@ import {Agent, AgentCommandService} from '@tokenring-ai/agent';
 import type AgentManager from '@tokenring-ai/agent/services/AgentManager';
 import {CommandHistoryState} from '@tokenring-ai/agent/state/commandHistoryState';
 import {Box, Text} from 'ink';
+import Spinner from 'ink-spinner';
 import React, {useCallback, useMemo} from 'react';
 
 import {Screen} from "../AgentCLI.tsx"
@@ -86,6 +87,13 @@ export default function AgentChatScreen({
           </Box>
       )}
       <Box marginTop={1} />
+      {appState.type === 'busy' && (
+        <Box>
+          <Text color="cyan">
+            <Spinner type="dots" /> {appState.message}
+          </Text>
+        </Box>
+      )}
       {appState.type === 'idle' && (
         <CommandInput
           prompt="user >"

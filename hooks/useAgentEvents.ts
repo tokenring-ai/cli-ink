@@ -16,6 +16,7 @@ export interface SystemMessage {
 export type AppState =
   | { type: 'idle' }
   | { type: 'processing'; inputMessage: string | null }
+  | { type: 'busy'; message: string }
   | { type: 'human-request'; request: HumanInterfaceRequest; handleResponse(response: HumanInterfaceResponse): void }
   | { type: 'exited' };
 
@@ -75,6 +76,14 @@ export function useAgentEvents(agent: Agent | null) {
             /*resetOutput();
             setInputMessage(`> ${event.data.message}`);
             setAppState({ type: 'processing', inputMessage: event.data.message });*/
+            break;
+
+          case 'state.busy':
+            setAppState({ type: 'busy', message: event.data.message });
+            break;
+
+          case 'state.notBusy':
+            setAppState(prev => prev.type === 'busy' ? { type: 'processing', inputMessage: null } : prev);
             break;
 
           case 'state.idle':

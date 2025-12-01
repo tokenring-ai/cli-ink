@@ -1,4 +1,6 @@
+import {TitledBox} from "@mishieck/ink-titled-box";
 import type AgentManager from '@tokenring-ai/agent/services/AgentManager';
+import {Box, Text} from "ink";
 import React, {useCallback, useMemo} from 'react';
 import {Screen} from "../AgentCLI.tsx";
 import type {TreeLeaf} from './TreeSelectionScreen.tsx';
@@ -15,6 +17,7 @@ export default function AgentSelectionScreen({
   setScreen,
   onCancel,
 }: AgentSelectionScreenProps) {
+  const [err, setError] = React.useState<Error | null>(null);
   const tree: TreeLeaf = useMemo(() => {
     const configs = Object.entries(agentManager.getAgentConfigs());
     
@@ -61,17 +64,28 @@ export default function AgentSelectionScreen({
 
     const [action, id] = agentType.split(':');
     if (action === 'spawn') {
-      const agent = await agentManager.spawnAgent(id);
-      if (agent) setScreen({ type: 'chat', agentId: agent.id });
+      try {
+        const agent = await agentManager.spawnAgent(id);
+        if (agent) setScreen({type: 'chat', agentId: agent.id});
+      } catch (e) {
+        setError(e as Error);
+      }
     } else if (action === 'connect') {
       setScreen({ type: 'chat', agentId: id });
     }
   }, [agentManager, setScreen, onCancel]);
 
   return (
-    <TreeSelectionScreen
-      request={{ type: 'askForSingleTreeSelection', tree }}
-      onResponse={handleSelect}
-    />
+    <Box flexDirection="column">
+      <TreeSelectionScreen
+        request={{ type: 'askForSingleTreeSelection', tree }}
+        onResponse={handleSelect}
+      />
+      { err &&
+        <TitledBox titles={["Error while creating agent"]} borderStyle="round" paddingX={1} borderColor="red">
+          <Text color="red">{err.message}</Text>
+        </TitledBox>
+      }
+    </Box>
   );
 }

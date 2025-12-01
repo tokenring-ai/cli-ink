@@ -37,7 +37,7 @@ export default function AgentCLI({
   bannerCompact,
   bannerColor
 }: AgentCLIProps) {
-  const { exit, setTallMode } = useApp();
+  const { exit } = useApp();
   
   useInput((input, key) => {
     if (key.ctrl && input === 'c') {
@@ -53,10 +53,6 @@ export default function AgentCLI({
 
   const currentAgent = useMemo(() => screen.type === 'chat' ? agentManager.getAgent(screen.agentId) : null, [screen, agentManager]);
   const { appState } = useAgentEvents(currentAgent);
-
-  useEffect(() => {
-    setTallMode(screen.type === 'chat');
-  }, [screen.type]);
 
   if (screen.type === 'selectAgent' || currentAgent === null) {
     return (
