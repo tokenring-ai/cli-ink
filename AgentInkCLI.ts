@@ -31,7 +31,7 @@ export default class AgentInkCLI implements TokenRingService {
         agentManager: this.app.requireService(AgentManager),
         ...this.config
       }),
-      { exitOnCtrlC: false, incrementalRendering: true, tallMode: true, maxFps: 120},
+      { exitOnCtrlC: false, incrementalRendering: true, tallMode: true, maxFps: 30},
     );
 
     await waitUntilExit();

@@ -54,7 +54,7 @@ export default function AgentChatScreen({
 
   return (
     <Box flexDirection="column" width={120}>
-      {blocks.map((block, idx) =>
+      {blocks.slice(-100).map((block, idx) =>
         block.type === 'reasoning' ?
           <Box key={idx} flexDirection="column" marginTop={1} marginBottom={1}>
             <Box flexDirection="row">

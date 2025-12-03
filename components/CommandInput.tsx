@@ -19,6 +19,7 @@ export const CommandInput: React.FC<CommandInputProps> = ({
                                                             onCtrlC,
                                                             prompt = '>',
                                                           }) => {
+  const [key, setKey] = useState(() => Math.random());
   const [value, setValue] = useState('');
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [suggestion, setSuggestion] = useState('');
@@ -37,6 +38,7 @@ export const CommandInput: React.FC<CommandInputProps> = ({
     if (key.upArrow && history.length > 0) {
       const newIndex = Math.min(historyIndex + 1, history.length - 1);
       setHistoryIndex(newIndex);
+      setKey(Math.random());
       setValue(history[history.length - 1 - newIndex] ?? '');
       return;
     }
@@ -44,6 +46,7 @@ export const CommandInput: React.FC<CommandInputProps> = ({
     if (key.downArrow && historyIndex > -1) {
       const newIndex = historyIndex - 1;
       setHistoryIndex(newIndex);
+      setKey(Math.random());
       setValue(newIndex >= 0 ? (history[history.length - 1 - newIndex] ?? '') : '');
       return;
     }
@@ -80,11 +83,12 @@ export const CommandInput: React.FC<CommandInputProps> = ({
     <Box>
       <Text color="yellowBright">{prompt} </Text>
       <TextInput
+        key={key}
         value={value}
         onChange={handleChange}
         onSubmit={handleSubmit}
       />
-      {suggestion && (
+      {false && suggestion && (
         <Text>{suggestion.slice(value.length)}</Text>
       )}
     </Box>
