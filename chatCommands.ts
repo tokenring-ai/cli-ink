@@ -1,4 +1,4 @@
-import {default as markdown} from "./commands/markdown.ts";
+import markdown from "./commands/markdown.ts";
 
 export default {
   markdown,

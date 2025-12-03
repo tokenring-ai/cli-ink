@@ -66,12 +66,12 @@ export default function AgentSelectionScreen({
     if (action === 'spawn') {
       try {
         const agent = await agentManager.spawnAgent(id);
-        if (agent) setScreen({type: 'chat', agentId: agent.id});
+        if (agent) setScreen({ name: 'chat', agentId: agent.id});
       } catch (e) {
         setError(e as Error);
       }
     } else if (action === 'connect') {
-      setScreen({ type: 'chat', agentId: id });
+      setScreen({ name: 'chat', agentId: id });
     }
   }, [agentManager, setScreen, onCancel]);
 

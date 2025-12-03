@@ -1,5 +1,6 @@
 import {Agent, AgentCommandService} from '@tokenring-ai/agent';
 import type AgentManager from '@tokenring-ai/agent/services/AgentManager';
+import {AgentEventState} from "@tokenring-ai/agent/state/agentEventState";
 import {CommandHistoryState} from '@tokenring-ai/agent/state/commandHistoryState';
 import {Box, Text} from 'ink';
 import Spinner from 'ink-spinner';
@@ -9,19 +10,21 @@ import {Screen} from "../AgentCLI.tsx"
 import {CommandInput} from '../components/CommandInput.tsx';
 import Markdown from "../components/Markdown.tsx";
 import {useAgentEvents} from '../hooks/useAgentEvents.ts';
+import {useOutputBlocks} from "../hooks/useOutputBlocks.tsx";
 
 interface AgentChatScreenProps {
-  agentManager: AgentManager;
+  agentEventState: AgentEventState | null;
   currentAgent: Agent;
   setScreen: (screen: Screen) => void;
 }
 
 export default function AgentChatScreen({
-  agentManager,
+  agentEventState,
   currentAgent,
   setScreen,
 }: AgentChatScreenProps) {
-  const { blocks, appState, resetOutput } = useAgentEvents(currentAgent);
+
+  const blocks = useOutputBlocks(agentEventState?.events ?? null);
 
   const availableCommands = useMemo(() => {
     if (!currentAgent) return [];
@@ -38,23 +41,16 @@ export default function AgentChatScreen({
     if (!currentAgent) return;
 
     if (value === '/switch') {
-      resetOutput();
-      setScreen({ type: 'selectAgent' });
+      setScreen({ name: 'selectAgent' });
       return;
     }
 
     currentAgent.handleInput({ message: value });
-  }, [currentAgent, resetOutput, setScreen]);
+  }, [currentAgent, setScreen]);
 
   const handleSwitchToAgentSelect = useCallback(() => {
-    resetOutput();
-    setScreen({ type: 'selectAgent' });
-  }, [resetOutput, setScreen]);
-
-  if (appState.type === 'exited' && currentAgent) {
-    agentManager.deleteAgent(currentAgent);
-    setScreen({ type: 'selectAgent' });
-  }
+    setScreen({ name: 'selectAgent' });
+  }, [setScreen]);
 
   return (
     <Box flexDirection="column" width={120}>
@@ -87,14 +83,14 @@ export default function AgentChatScreen({
           </Box>
       )}
       <Box marginTop={1} />
-      {appState.type === 'busy' && (
+      {agentEventState?.busyWith && (
         <Box>
           <Text color="cyan">
-            <Spinner type="dots" /> {appState.message}
+            <Spinner type="dots" /> {agentEventState.busyWith}
           </Text>
         </Box>
       )}
-      {appState.type === 'idle' && (
+      {agentEventState?.idle && (
         <CommandInput
           prompt="user >"
           history={commandHistory}

@@ -1,4 +1,8 @@
-import {HumanInterfaceRequestFor, HumanInterfaceResponseFor} from "@tokenring-ai/agent/HumanInterfaceRequest";
+import {
+  HumanInterfaceRequestFor,
+  HumanInterfaceResponse,
+  HumanInterfaceResponseFor
+} from "@tokenring-ai/agent/HumanInterfaceRequest";
 import type AgentManager from '@tokenring-ai/agent/services/AgentManager';
 import {Box, Text, useApp, useInput} from 'ink';
 import React, {useEffect, useMemo, useState} from 'react';
@@ -16,14 +20,14 @@ import WebPageScreen from './screens/WebPageScreen.tsx';
 
 
 export type Screen =
-  | { type: 'selectAgent' }
-  | { type: 'chat'; agentId: string }
-  | { type: 'askForConfirmation'; request: HumanInterfaceRequestFor<"askForConfirmation">, onResponse: (response: HumanInterfaceResponseFor<'askForConfirmation'>) => void }
-  | { type: 'askForPassword'; request: HumanInterfaceRequestFor<"askForPassword">, onResponse: (response: HumanInterfaceResponseFor<'askForPassword'>) => void }
-  | { type: 'openWebPage'; request: HumanInterfaceRequestFor<"openWebPage">, onResponse: (response: HumanInterfaceResponseFor<'openWebPage'>) => void }
-  | { type: 'askForSingleTreeSelection'; request: HumanInterfaceRequestFor<"askForSingleTreeSelection">, onResponse: (response: HumanInterfaceResponseFor<'askForSingleTreeSelection'>) => void }
-  | { type: 'askForMultipleTreeSelection'; request: HumanInterfaceRequestFor<"askForMultipleTreeSelection">, onResponse: (response: HumanInterfaceResponseFor<'askForMultipleTreeSelection'>) => void }
-  | { type: 'askForText'; request: HumanInterfaceRequestFor<"askForText">, onResponse: (response: HumanInterfaceResponseFor<'askForText'>) => void };
+  | { name: 'selectAgent' }
+  | { name: 'chat'; agentId: string }
+  | { name: 'askForConfirmation'; request: HumanInterfaceRequestFor<"askForConfirmation">, onResponse: (response: HumanInterfaceResponseFor<'askForConfirmation'>) => void }
+  | { name: 'askForPassword'; request: HumanInterfaceRequestFor<"askForPassword">, onResponse: (response: HumanInterfaceResponseFor<'askForPassword'>) => void }
+  | { name: 'openWebPage'; request: HumanInterfaceRequestFor<"openWebPage">, onResponse: (response: HumanInterfaceResponseFor<'openWebPage'>) => void }
+  | { name: 'askForSingleTreeSelection'; request: HumanInterfaceRequestFor<"askForSingleTreeSelection">, onResponse: (response: HumanInterfaceResponseFor<'askForSingleTreeSelection'>) => void }
+  | { name: 'askForMultipleTreeSelection'; request: HumanInterfaceRequestFor<"askForMultipleTreeSelection">, onResponse: (response: HumanInterfaceResponseFor<'askForMultipleTreeSelection'>) => void }
+  | { name: 'askForText'; request: HumanInterfaceRequestFor<"askForText">, onResponse: (response: HumanInterfaceResponseFor<'askForText'>) => void };
 
 
 interface AgentCLIProps extends z.infer<typeof InkCLIConfigSchema> {
@@ -41,20 +45,20 @@ export default function AgentCLI({
   
   useInput((input, key) => {
     if (key.ctrl && input === 'c') {
-      if (screen.type === 'selectAgent') {
+      if (screen.name === 'selectAgent') {
         exit();
       } else {
-        setScreen({ type: 'selectAgent' });
+        setScreen({ name: 'selectAgent' });
       }
     }
   });
 
-  const [screen, setScreen] = useState<Screen>({ type: 'selectAgent' });
+  const [screen, setScreen] = useState<Screen>({ name: 'selectAgent' });
 
-  const currentAgent = useMemo(() => screen.type === 'chat' ? agentManager.getAgent(screen.agentId) : null, [screen, agentManager]);
-  const { appState } = useAgentEvents(currentAgent);
+  const currentAgent = useMemo(() => screen.name === 'chat' ? agentManager.getAgent(screen.agentId) : null, [screen, agentManager]);
+  const agentEventState = useAgentEvents(currentAgent);
 
-  if (screen.type === 'selectAgent' || currentAgent === null) {
+  if (screen.name === 'selectAgent' || currentAgent === null) {
     return (
       <Box flexDirection="column">
         <Text color={bannerColor}>{bannerWide}</Text>
@@ -67,13 +71,16 @@ export default function AgentCLI({
     );
   }
 
-  if (appState.type === 'human-request') {
-    const { request, handleResponse } = appState;
+  if (agentEventState?.waitingOn) {
+    const { id, request } = agentEventState.waitingOn.data;
+    const handleResponse = (response: HumanInterfaceResponse) => {
+      currentAgent.sendHumanResponse(id, response);
+    }
     return (
       <Box flexDirection="column">
         <Box borderStyle="round" paddingX={1}><Text color={bannerColor}>{bannerCompact}</Text></Box>
         {request.type === 'askForConfirmation' && (
-          <ConfirmationScreen message={request.message} defaultValue={request.default} onConfirm={handleResponse} />
+          <ConfirmationScreen message={request.message} defaultValue={request.default} timeout={request.timeout} onConfirm={handleResponse} />
         )}
         {request.type === 'askForPassword' && (
           <PasswordScreen request={request} onResponse={handleResponse} />
@@ -104,8 +111,8 @@ export default function AgentCLI({
     <Box flexDirection="column">
       <Box borderStyle="round" paddingX={1}><Text color={bannerColor}>{bannerCompact}</Text></Box>
       <AgentChatScreen
+        agentEventState={agentEventState}
         currentAgent={currentAgent}
-        agentManager={agentManager}
         setScreen={setScreen}
       />
     </Box>

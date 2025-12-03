@@ -3,6 +3,7 @@ import {HumanInterfaceRequestFor, HumanInterfaceResponseFor} from "@tokenring-ai
 import {Box, Text, useInput} from 'ink';
 
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import useScreenSize from "../hooks/useScreenSize.ts";
 
 export type TreeLeaf = {
   name: string
@@ -33,9 +34,10 @@ interface FlatNode {
   expanded: boolean;
   loading: boolean;
 }
-
 export default function TreeSelectionScreen({ request, onResponse }: TreeSelectInputProps) {
+  const { rows } = useScreenSize();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollOffset, setScrollOffset] = useState(0);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState<Set<string>>(new Set());
@@ -43,6 +45,9 @@ export default function TreeSelectionScreen({ request, onResponse }: TreeSelectI
 
   const { tree } = request;
   const multiple = request.type === 'askForMultipleTreeSelection';
+
+  // Calculate max visible items (rows - 2 for title and footer)
+  const maxVisibleItems = Math.max(1, rows - 6);
 
 // Load root children if they're async
   useEffect(() => {
@@ -167,6 +172,17 @@ export default function TreeSelectionScreen({ request, onResponse }: TreeSelectI
     }
   }, [resolvedChildren]);
 
+  // Auto-scroll effect when selectedIndex changes
+  useEffect(() => {
+    if (selectedIndex < scrollOffset) {
+      // Scrolling up
+      setScrollOffset(selectedIndex);
+    } else if (selectedIndex >= scrollOffset + maxVisibleItems) {
+      // Scrolling down
+      setScrollOffset(selectedIndex - maxVisibleItems + 1);
+    }
+  }, [selectedIndex, maxVisibleItems, scrollOffset]);
+
   useInput((input, key) => {
     if ((key.escape || input === 'q')) {
       onResponse(null);
@@ -177,6 +193,12 @@ export default function TreeSelectionScreen({ request, onResponse }: TreeSelectI
       setSelectedIndex(prev => Math.max(0, prev - 1));
     } else if (key.downArrow) {
       setSelectedIndex(prev => Math.min(flatTree.length - 1, prev + 1));
+    } else if (key.pageUp) {
+      const halfScreen = Math.floor(maxVisibleItems / 2);
+      setSelectedIndex(prev => Math.max(0, prev - halfScreen));
+    } else if (key.pageDown) {
+      const halfScreen = Math.floor(maxVisibleItems / 2);
+      setSelectedIndex(prev => Math.min(flatTree.length - 1, prev + halfScreen));
     } else if (key.rightArrow) {
       const current = flatTree[selectedIndex];
       if (current && !current.loading) {
@@ -226,24 +248,33 @@ export default function TreeSelectionScreen({ request, onResponse }: TreeSelectI
     }
   });
 
+
+  // Get visible slice of flatTree
+  const visibleTree = useMemo(() => {
+    return flatTree.slice(scrollOffset, scrollOffset + maxVisibleItems);
+  }, [flatTree, scrollOffset, maxVisibleItems]);
+
   return (
     <TitledBox flexDirection="column" titles={[tree.name]} borderStyle="single">
-      {flatTree.map((item, index) => (
-        <Box key={index}>
-          <Text color={index === selectedIndex ? 'green' : undefined}>
-            {'  '.repeat(item.depth)}
-            {index === selectedIndex ? '❯ ' : '  '}
-            {item.loading
-              ? '⏳ '
-              : (item.node.children || item.node.childrenLoader || item.node.hasChildren)
-                ? (item.expanded ? '▼ ' : '▶ ')
-                : '  '}
-            {multiple && (checked.has(item.node.value) ? '◉ ' : '◯ ')}
-            {item.node.label}
-            {item.loading && <Text dimColor> Loading...</Text>}
-          </Text>
-        </Box>
-      ))}
+      {visibleTree.map((item, visibleIndex) => {
+        const actualIndex = scrollOffset + visibleIndex;
+        return (
+          <Box key={actualIndex}>
+            <Text color={actualIndex === selectedIndex ? 'green' : undefined}>
+              {'  '.repeat(item.depth)}
+              {actualIndex === selectedIndex ? '❯ ' : '  '}
+              {item.loading
+                ? '⏳ '
+                : (item.node.children || item.node.childrenLoader || item.node.hasChildren)
+                  ? (item.expanded ? '▼ ' : '▶ ')
+                  : '  '}
+              {multiple && (checked.has(item.node.value) ? '◉ ' : '◯ ')}
+              {item.node.label}
+              {item.loading && <Text dimColor> Loading...</Text>}
+            </Text>
+          </Box>
+        );
+      })}
       <Text dimColor>({multiple ? 'Space to toggle, Enter to submit' : 'Enter to select'}), q to exit</Text>
     </TitledBox>
   );

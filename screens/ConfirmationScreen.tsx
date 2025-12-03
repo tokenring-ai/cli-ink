@@ -4,11 +4,24 @@ import React, {useState} from 'react';
 export interface ConfirmInputProps {
   message: string;
   defaultValue?: boolean;
+  timeout?: number;
   onConfirm: (value: boolean) => void;
 }
 
-export default function ConfirmationScreen({ message, defaultValue = false, onConfirm }: ConfirmInputProps) {
+export default function ConfirmationScreen({ message, defaultValue = false, timeout, onConfirm }: ConfirmInputProps) {
   const [value, setValue] = useState(defaultValue);
+  const [remaining, setRemaining] = useState(timeout);
+
+  React.useEffect(() => {
+    if (timeout && timeout > 0) {
+      const timer = setTimeout(() => onConfirm(defaultValue), timeout * 1000);
+      const interval = setInterval(() => setRemaining(prev => Math.max(0, (prev ?? timeout) - 1)), 1000);
+      return () => {
+        clearTimeout(timer);
+        clearInterval(interval);
+      };
+    }
+  }, [timeout, defaultValue, onConfirm]);
 
   useInput((input, key) => {
     if (input.toLowerCase() === 'y') {
@@ -29,6 +42,7 @@ export default function ConfirmationScreen({ message, defaultValue = false, onCo
         <Text color={value ? 'green' : 'gray'}>[Yes]</Text>
         <Text> / </Text>
         <Text color={!value ? 'red' : 'gray'}>[No]</Text>
+        {timeout && timeout > 0 && <Text color="yellow"> ({remaining}s)</Text>}
       </Box>
     </Box>
   );
