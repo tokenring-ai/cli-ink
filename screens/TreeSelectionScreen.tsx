@@ -42,12 +42,25 @@ export default function TreeSelectionScreen({ request, onResponse }: TreeSelectI
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState<Set<string>>(new Set());
   const [resolvedChildren, setResolvedChildren] = useState<Map<string, TreeLeaf[]>>(new Map());
+  const [remaining, setRemaining] = useState(request.timeout);
 
-  const { tree } = request;
+  const { tree, timeout, default: defaultValue } = request;
   const multiple = request.type === 'askForMultipleTreeSelection';
 
   // Calculate max visible items (rows - 2 for title and footer)
   const maxVisibleItems = Math.max(1, rows - 6);
+
+  // Timeout handler
+  useEffect(() => {
+    if (timeout && timeout > 0) {
+      const timer = setTimeout(() => onResponse(defaultValue as any), timeout * 1000);
+      const interval = setInterval(() => setRemaining(prev => Math.max(0, (prev ?? timeout) - 1)), 1000);
+      return () => {
+        clearTimeout(timer);
+        clearInterval(interval);
+      };
+    }
+  }, [timeout, defaultValue, onResponse]);
 
 // Load root children if they're async
   useEffect(() => {
@@ -275,7 +288,10 @@ export default function TreeSelectionScreen({ request, onResponse }: TreeSelectI
           </Box>
         );
       })}
-      <Text dimColor>({multiple ? 'Space to toggle, Enter to submit' : 'Enter to select'}), q to exit</Text>
+      <Text dimColor>
+        ({multiple ? 'Space to toggle, Enter to submit' : 'Enter to select'}), q to exit
+        {timeout && timeout > 0 && <Text color="yellow"> ({remaining}s)</Text>}
+      </Text>
     </TitledBox>
   );
 }
