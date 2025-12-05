@@ -18,31 +18,31 @@ function processEvent(event: AgentEventState["events"][number], blocks: OutputBl
   switch (event.type) {
     case 'output.chat':
       if (last?.type === 'chat') {
-        last.content += event.data.content;
+        last.content += event.content;
       } else {
-        blocks.push({type: 'chat', content: event.data.content});
+        blocks.push({type: 'chat', content: event.content});
       }
       break;
 
     case 'output.reasoning':
       if (last?.type === 'reasoning') {
-        last.content += event.data.content;
+        last.content += event.content;
       } else {
-        blocks.push({type: 'reasoning', content: event.data.content});
+        blocks.push({type: 'reasoning', content: event.content});
       }
       break;
 
     case 'output.system':
-      blocks.push({type: 'system', content: event.data.message, level: event.data.level});
+      blocks.push({type: 'system', content: event.message, level: event.level});
       break;
 
     case 'input.received':
-      blocks.push({type: 'input', content: event.data.message});
+      blocks.push({type: 'input', content: event.message});
       break;
 
     case 'input.handled':
-      if (event.data.status === 'cancelled' || event.data.status === 'error') {
-        blocks.push({type: 'system', content: event.data.message, level: "error"});
+      if (event.status === 'cancelled' || event.status === 'error') {
+        blocks.push({type: 'system', content: event.message, level: "error"});
       }
       break;
   }

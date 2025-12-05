@@ -3,7 +3,9 @@ import {
   HumanInterfaceResponse,
   HumanInterfaceResponseFor
 } from "@tokenring-ai/agent/HumanInterfaceRequest";
-import type AgentManager from '@tokenring-ai/agent/services/AgentManager';
+import AgentManager from '@tokenring-ai/agent/services/AgentManager';
+import TokenRingApp from "@tokenring-ai/app";
+import {WebHostService} from "@tokenring-ai/web-host";
 import {Box, Text, useApp, useInput} from 'ink';
 import React, {useEffect, useMemo, useState} from 'react';
 
@@ -32,16 +34,20 @@ export type Screen =
 
 interface AgentCLIProps extends z.infer<typeof InkCLIConfigSchema> {
   agentManager: AgentManager;
+  app: TokenRingApp;
 }
 
 export default function AgentCLI({
-  agentManager,
+  app,
   bannerNarrow,
   bannerWide,
   bannerCompact,
   bannerColor
 }: AgentCLIProps) {
   const { exit } = useApp();
+
+  const agentManager = useMemo(() => app.requireService(AgentManager), [app]);
+  const webHostService = useMemo(() => app.getService(WebHostService), [app]);
   
   useInput((input, key) => {
     if (key.ctrl && input === 'c') {
@@ -63,6 +69,7 @@ export default function AgentCLI({
       <Box flexDirection="column">
         <Text color={bannerColor}>{bannerWide}</Text>
         <AgentSelectionScreen
+          webHostService={webHostService}
           agentManager={agentManager}
           setScreen={setScreen}
           onCancel={exit}
@@ -72,7 +79,7 @@ export default function AgentCLI({
   }
 
   if (agentEventState?.waitingOn) {
-    const { id, request } = agentEventState.waitingOn.data;
+    const { id, request } = agentEventState.waitingOn;
     const handleResponse = (response: HumanInterfaceResponse) => {
       currentAgent.sendHumanResponse(id, response);
     }

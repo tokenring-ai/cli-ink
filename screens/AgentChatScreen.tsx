@@ -1,5 +1,4 @@
 import {Agent, AgentCommandService} from '@tokenring-ai/agent';
-import type AgentManager from '@tokenring-ai/agent/services/AgentManager';
 import {AgentEventState} from "@tokenring-ai/agent/state/agentEventState";
 import {CommandHistoryState} from '@tokenring-ai/agent/state/commandHistoryState';
 import {Box, Text} from 'ink';
@@ -9,7 +8,6 @@ import React, {useCallback, useMemo} from 'react';
 import {Screen} from "../AgentCLI.tsx"
 import {CommandInput} from '../components/CommandInput.tsx';
 import Markdown from "../components/Markdown.tsx";
-import {useAgentEvents} from '../hooks/useAgentEvents.ts';
 import {useOutputBlocks} from "../hooks/useOutputBlocks.tsx";
 
 interface AgentChatScreenProps {
@@ -23,7 +21,6 @@ export default function AgentChatScreen({
   currentAgent,
   setScreen,
 }: AgentChatScreenProps) {
-
   const blocks = useOutputBlocks(agentEventState?.events ?? null);
 
   const availableCommands = useMemo(() => {

@@ -1,18 +1,22 @@
 import {TitledBox} from "@mishieck/ink-titled-box";
 import type AgentManager from '@tokenring-ai/agent/services/AgentManager';
+import {WebHostService} from "@tokenring-ai/web-host";
 import {Box, Text} from "ink";
 import React, {useCallback, useMemo} from 'react';
 import {Screen} from "../AgentCLI.tsx";
 import type {TreeLeaf} from './TreeSelectionScreen.tsx';
 import TreeSelectionScreen from './TreeSelectionScreen.tsx';
+import open from 'open';
 
 interface AgentSelectionScreenProps {
+  webHostService?: WebHostService;
   agentManager: AgentManager;
   setScreen: (screen: Screen) => void;
   onCancel: () => void;
 }
 
 export default function AgentSelectionScreen({
+  webHostService,
   agentManager,
   setScreen,
   onCancel,
@@ -22,6 +26,13 @@ export default function AgentSelectionScreen({
     const configs = Object.entries(agentManager.getAgentConfigs());
     
     const categories: Record<string, TreeLeaf[]> = {};
+
+    if (webHostService) {
+      categories['Web Application'] = [{
+        name: "Connect to the hosted Agent UI",
+        value: `open:chat/index.html`,
+      }];
+    }
 
     configs.forEach(([type, config]) => {
       const leaf: TreeLeaf = {
@@ -62,18 +73,25 @@ export default function AgentSelectionScreen({
       return;
     }
 
-    const [action, typeOrId] = agentType.split(':');
+    const [action, remainder] = agentType.split(':');
     if (action === 'spawn') {
       try {
-        const agent = await agentManager.spawnAgent({ agentType: typeOrId, headless: false });
+        const agent = await agentManager.spawnAgent({ agentType: remainder, headless: false });
         if (agent) setScreen({ name: 'chat', agentId: agent.id});
       } catch (e) {
         setError(e as Error);
       }
     } else if (action === 'connect') {
-      setScreen({ name: 'chat', agentId: typeOrId });
+      setScreen({ name: 'chat', agentId: remainder });
+    } else if (action === 'open') {
+      const url = webHostService?.getURL()?.toString() ?? undefined
+      if (!url) {
+        setError(new Error('The web host service does not appear to be bound to a valid host/port.'));
+      } else {
+        open(`${url}${remainder}`);
+      }
     }
-  }, [agentManager, setScreen, onCancel]);
+  }, [agentManager, webHostService, setScreen, onCancel]);
 
   return (
     <Box flexDirection="column">

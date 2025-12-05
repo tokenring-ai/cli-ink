@@ -8,6 +8,7 @@
   "@tokenring-ai/agent": "0.2.0",
   "@tokenring-ai/app": "0.2.0",
   "@tokenring-ai/utility": "0.2.0",
+  "@tokenring-ai/web-host": "0.2.0",
   "chalk": "^5.6.2",
   "cli-highlight": "^2.1.11",
   "execa": "^9.6.0",
