@@ -1,6 +1,7 @@
 import {TitledBox} from "@mishieck/ink-titled-box";
 import type AgentManager from '@tokenring-ai/agent/services/AgentManager';
 import {WebHostService} from "@tokenring-ai/web-host";
+import SPAResource from "@tokenring-ai/web-host/SPAResource";
 import {Box, Text} from "ink";
 import React, {useCallback, useMemo} from 'react';
 import {Screen} from "../AgentCLI.tsx";
@@ -28,10 +29,19 @@ export default function AgentSelectionScreen({
     const categories: Record<string, TreeLeaf[]> = {};
 
     if (webHostService) {
-      categories['Web Application'] = [{
-        name: "Connect to the hosted Agent UI",
-        value: `open:chat/index.html`,
-      }];
+      const webResources = webHostService.getResources();
+      for (const resourceName in webResources) {
+        const resource = webResources[resourceName];
+        if (resource instanceof SPAResource) {
+          const webApps = categories['Web Application'] ??= [];
+          webApps.push(
+            {
+              name: `Connect to ${resourceName}`,
+              value: `open:${resource.config.prefix.substring(1)}`,
+            }
+          );
+        }
+      }
     }
 
     configs.forEach(([type, config]) => {

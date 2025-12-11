@@ -1,40 +1,40 @@
 {
- "name": "@tokenring-ai/cli-ink",
- "description": "Ink based CLI for TokenRing apps",
- "version": "0.2.0",
- "dependencies": {
-  "@inquirer/prompts": "^8.0.1",
-  "@mishieck/ink-titled-box": "^0.3.0",
-  "@tokenring-ai/agent": "0.2.0",
-  "@tokenring-ai/app": "0.2.0",
-  "@tokenring-ai/utility": "0.2.0",
-  "@tokenring-ai/web-host": "0.2.0",
-  "chalk": "^5.6.2",
-  "cli-highlight": "^2.1.11",
-  "execa": "^9.6.0",
-  "ink": "workspace:*",
-  "ink-divider": "^4.1.1",
-  "ink-spinner": "^5.0.0",
-  "ink-syntax-highlight": "^2.0.2",
-  "ink-text-input": "^6.0.0",
-  "marked": "^17.0.1",
-  "open": "^11.0.0",
-  "react": "^19.2.0",
-  "zod": "^4.1.13"
- },
- "devDependencies": {
-  "typescript": "^5.9.3",
-  "@types/react": "^19.2.7"
- },
- "exports": {
-  ".": "./index.ts",
-  "./*": "./*.ts"
- },
- "types": "./dist-types/index.d.ts",
- "license": "MIT",
- "scripts": {
-  "build": "tsc -p tsconfig.tson",
-  "test": "vitest run"
- },
- "type": "module"
+  "name": "@tokenring-ai/cli-ink",
+  "description": "Ink based CLI for TokenRing apps",
+  "version": "0.2.0",
+  "dependencies": {
+    "@inquirer/prompts": "^8.0.2",
+    "@mishieck/ink-titled-box": "^0.3.0",
+    "@tokenring-ai/agent": "0.2.0",
+    "@tokenring-ai/app": "0.2.0",
+    "@tokenring-ai/utility": "0.2.0",
+    "@tokenring-ai/web-host": "0.2.0",
+    "chalk": "^5.6.2",
+    "cli-highlight": "^2.1.11",
+    "execa": "^9.6.1",
+    "ink": "workspace:*",
+    "ink-divider": "^4.1.1",
+    "ink-spinner": "^5.0.0",
+    "ink-syntax-highlight": "^2.0.2",
+    "ink-text-input": "^6.0.0",
+    "marked": "^17.0.1",
+    "open": "^11.0.0",
+    "react": "^19.2.1",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/react": "^19.2.7"
+  },
+  "exports": {
+    ".": "./index.ts",
+    "./*": "./*.ts"
+  },
+  "types": "./dist-types/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.tson",
+    "test": "vitest run"
+  },
+  "type": "module"
 }
