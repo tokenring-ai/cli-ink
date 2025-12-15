@@ -25,7 +25,7 @@ export default class AgentInkCLI implements TokenRingService {
     this.config = config;
   }
 
-  async start(): Promise<void> {
+  async run(): Promise<void> {
     const { waitUntilExit } = render(
       React.createElement(AgentCLI, {
         app: this.app,

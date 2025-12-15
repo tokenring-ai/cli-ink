@@ -1,5 +1,5 @@
 import {Box, Text, useInput} from 'ink';
-import TextInput from 'ink-text-input';
+import TextInput, {UncontrolledTextInput} from 'ink-text-input';
 import React, {useCallback, useState} from 'react';
 
 export interface CommandInputProps {
@@ -82,10 +82,8 @@ export const CommandInput: React.FC<CommandInputProps> = ({
   return (
     <Box>
       <Text color="yellowBright">{prompt} </Text>
-      <TextInput
+      <UncontrolledTextInput
         key={key}
-        value={value}
-        onChange={handleChange}
         onSubmit={handleSubmit}
       />
       {false && suggestion && (
