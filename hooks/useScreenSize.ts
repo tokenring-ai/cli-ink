@@ -1,4 +1,4 @@
-import {useStdin, useStdout} from "ink";
+import {useStdout} from "ink";
 import {useEffect, useState} from "react";
 
 export default function useScreenSize() {

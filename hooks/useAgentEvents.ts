@@ -1,6 +1,6 @@
 import type Agent from '@tokenring-ai/agent/Agent';
 import {AgentEventState} from "@tokenring-ai/agent/state/agentEventState";
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useState} from 'react';
 
 
 export function useAgentEvents(agent: Agent | null) {

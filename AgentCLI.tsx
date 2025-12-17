@@ -7,7 +7,7 @@ import AgentManager from '@tokenring-ai/agent/services/AgentManager';
 import TokenRingApp from "@tokenring-ai/app";
 import {WebHostService} from "@tokenring-ai/web-host";
 import {Box, Text, useApp, useInput} from 'ink';
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useMemo, useState} from 'react';
 
 import {z} from "zod";
 import {InkCLIConfigSchema} from "./AgentInkCLI.ts";
