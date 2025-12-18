@@ -106,7 +106,7 @@ export default function AgentSelectionScreen({
   return (
     <Box flexDirection="column">
       <TreeSelectionScreen
-        request={{ type: 'askForSingleTreeSelection', tree }}
+        request={{ type: 'askForSingleTreeSelection', title: "Agent Selection", tree }}
         onResponse={handleSelect}
       />
       { err &&
