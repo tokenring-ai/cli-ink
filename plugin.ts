@@ -17,4 +17,4 @@ export default {
     const config = app.getConfigSlice('inkCLI', InkCLIConfigSchema);
     app.addServices(new AgentInkCLI(app, config));
   },
-} as TokenRingPlugin;
+} satisfies TokenRingPlugin;
