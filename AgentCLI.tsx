@@ -69,8 +69,7 @@ export default function AgentCLI({
       <Box flexDirection="column">
         <Text color={bannerColor}>{bannerWide}</Text>
         <AgentSelectionScreen
-          webHostService={webHostService}
-          agentManager={agentManager}
+          app={app}
           setScreen={setScreen}
           onCancel={exit}
         />
@@ -124,4 +123,4 @@ export default function AgentCLI({
       />
     </Box>
   );
-};
+}
