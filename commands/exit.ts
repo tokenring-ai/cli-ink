@@ -3,7 +3,7 @@ import type {TokenRingAgentCommand} from "@tokenring-ai/agent/types";
 
 export const description = "/exit - Exit the application" as const;
 
-export async function execute(_remainder: string | undefined, agent: Agent): Promise<void> {
+export async function execute(_remainder: string, agent: Agent): Promise<void> {
   agent.infoLine("Exiting application...");
 
   process.exit(0);

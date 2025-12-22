@@ -6,7 +6,7 @@ import markdownSample from '../markdown.sample.md' with {type: 'text'};
 
 const description = "/markdown - Outputs a sample of markdown" as const;
 
-async function execute(remainder: string | undefined, agent: Agent): Promise<void> {
+async function execute(remainder: string, agent: Agent): Promise<void> {
   agent.chatOutput(markdownSample);
 }
 
