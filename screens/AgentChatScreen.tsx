@@ -59,15 +59,15 @@ export default function AgentChatScreen({
               <Text>  Thinking  </Text>
               <Box flexGrow={1} borderStyle="single" borderLeft={false} borderRight={false} borderBottom={false} />
             </Box>
-            <Text color="yellow">{block.content}</Text>
+            <Text color="yellow">{block.message}</Text>
           </Box>
         : block.type === 'input' ?
           <Box key={idx} marginTop={1}>
-            <Text color="yellowBright">user &gt; </Text><Text>{block.content}</Text>
+            <Text color="yellowBright">user &gt; </Text><Text>{block.message}</Text>
           </Box>
         : block.type === 'system' ?
           <Box key={idx}>
-            <Text color={ block.level === 'info' ? 'blueBright' : block.level === 'warning' ? 'yellow' : 'red' }>{ block.content }</Text>
+            <Text color={ block.level === 'info' ? 'blueBright' : block.level === 'warning' ? 'yellow' : 'red' }>{ block.message }</Text>
           </Box>
         :
           <Box key={idx} flexDirection="column"  marginTop={1} marginBottom={1}>
@@ -76,7 +76,7 @@ export default function AgentChatScreen({
               <Text>  Response  </Text>
               <Box flexGrow={1} borderStyle="single" borderLeft={false} borderRight={false} borderBottom={false} />
             </Box>
-            <Markdown key={idx}>{block.content}</Markdown>
+            <Markdown key={idx}>{block.message}</Markdown>
           </Box>
       )}
       <Box marginTop={1} />

@@ -2,10 +2,10 @@ import {AgentEventState} from "@tokenring-ai/agent/state/agentEventState";
 import {useRef, useMemo} from "react";
 
 export type OutputBlock =
-  | { type: 'chat'; content: string }
-  | { type: 'reasoning'; content: string }
-  | { type: 'input'; content: string }
-  | { type: 'system'; content: string; level: 'info' | 'warning' | 'error' };
+  | { type: 'chat'; message: string }
+  | { type: 'reasoning'; message: string }
+  | { type: 'input'; message: string }
+  | { type: 'system'; message: string; level: 'info' | 'warning' | 'error' };
 
 interface BlocksCache {
   blocks: OutputBlock[];
@@ -18,31 +18,36 @@ function processEvent(event: AgentEventState["events"][number], blocks: OutputBl
   switch (event.type) {
     case 'output.chat':
       if (last?.type === 'chat') {
-        last.content += event.content;
+        last.message += event.message;
       } else {
-        blocks.push({type: 'chat', content: event.content});
+        blocks.push({type: 'chat', message: event.message});
       }
       break;
 
     case 'output.reasoning':
       if (last?.type === 'reasoning') {
-        last.content += event.content;
+        last.message += event.message;
       } else {
-        blocks.push({type: 'reasoning', content: event.content});
+        blocks.push({type: 'reasoning', message: event.message});
       }
       break;
-
-    case 'output.system':
-      blocks.push({type: 'system', content: event.message, level: event.level});
+    case 'output.info':
+      blocks.push({type: 'system', message: event.message, level: 'info'});
+      break;
+    case 'output.warning':
+      blocks.push({type: 'system', message: event.message, level: 'warning'});
+      break;
+    case 'output.error':
+      blocks.push({type: 'system', message: event.message, level: 'error'});
       break;
 
     case 'input.received':
-      blocks.push({type: 'input', content: event.message});
+      blocks.push({type: 'input', message: event.message});
       break;
 
     case 'input.handled':
       if (event.status === 'cancelled' || event.status === 'error') {
-        blocks.push({type: 'system', content: event.message, level: "error"});
+        blocks.push({type: 'system', message: event.message, level: "error"});
       }
       break;
   }
