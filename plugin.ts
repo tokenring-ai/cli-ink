@@ -5,7 +5,7 @@ import AgentInkCLI, {InkCLIConfigSchema} from "./AgentInkCLI.ts";
 import packageJSON from './package.json' with {type: 'json'};
 
 const packageConfigSchema = z.object({
-  inkCLI: InkCLIConfigSchema,
+  inkCLI: InkCLIConfigSchema.optional(),
 });
 
 export default {
@@ -13,8 +13,10 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
-    // const config = app.getConfigSlice('inkCLI', InkCLIConfigSchema);
-    app.addServices(new AgentInkCLI(app, config.inkCLI));
+    if (config.inkCLI) {
+      // const config = app.getConfigSlice('inkCLI', InkCLIConfigSchema);
+      app.addServices(new AgentInkCLI(app, config.inkCLI));
+    }
   },
   config: packageConfigSchema
 } satisfies TokenRingPlugin<typeof packageConfigSchema>;
