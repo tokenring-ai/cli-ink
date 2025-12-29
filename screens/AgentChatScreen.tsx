@@ -97,6 +97,11 @@ export default function AgentChatScreen({
           onCtrlC={handleSwitchToAgentSelect}
         />
       )}
+      {agentEventState?.statusLine && (
+        <Box marginTop={1} borderStyle="single" borderLeft={false} borderRight={false} borderTop={false}>
+          <Text color="green">●</Text> <Text color="green">{agentEventState.statusLine}</Text>
+        </Box>
+      )}
     </Box>
   );
 }
