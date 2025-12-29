@@ -14,7 +14,6 @@ export default {
   description: packageJSON.description,
   install(app, config) {
     if (config.inkCLI) {
-      // const config = app.getConfigSlice('inkCLI', InkCLIConfigSchema);
       app.addServices(new AgentInkCLI(app, config.inkCLI));
     }
   },
