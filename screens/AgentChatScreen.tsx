@@ -1,5 +1,6 @@
 import {Agent, AgentCommandService} from '@tokenring-ai/agent';
 import {AgentEventState} from "@tokenring-ai/agent/state/agentEventState";
+import {AgentExecutionState} from "@tokenring-ai/agent/state/agentExecutionState";
 import {CommandHistoryState} from '@tokenring-ai/agent/state/commandHistoryState';
 import {Box, Text} from 'ink';
 import Spinner from 'ink-spinner';
@@ -8,19 +9,20 @@ import React, {useCallback, useMemo} from 'react';
 import {Screen} from "../AgentCLI.tsx"
 import {CommandInput} from '../components/CommandInput.tsx';
 import Markdown from "../components/Markdown.tsx";
+import {useAgentStateSlice} from "../hooks/useAgentStateSlice.ts";
 import {useOutputBlocks} from "../hooks/useOutputBlocks.tsx";
 
 interface AgentChatScreenProps {
-  agentEventState: AgentEventState | null;
   currentAgent: Agent;
   setScreen: (screen: Screen) => void;
 }
 
 export default function AgentChatScreen({
-  agentEventState,
   currentAgent,
   setScreen,
 }: AgentChatScreenProps) {
+  const agentEventState = useAgentStateSlice(AgentEventState, currentAgent);
+  const agentExecutionState = useAgentStateSlice(AgentExecutionState, currentAgent);
   const blocks = useOutputBlocks(agentEventState?.events ?? null);
 
   const availableCommands = useMemo(() => {
@@ -80,14 +82,14 @@ export default function AgentChatScreen({
           </Box>
       )}
       <Box marginTop={1} />
-      {agentEventState?.busyWith && (
+      {agentExecutionState?.busyWith && (
         <Box>
           <Text color="cyan">
-            <Spinner type="dots" /> {agentEventState.busyWith}
+            <Spinner type="dots" /> {agentExecutionState.busyWith}
           </Text>
         </Box>
       )}
-      {agentEventState?.idle && (
+      {agentExecutionState?.idle && (
         <CommandInput
           prompt="user >"
           history={commandHistory}
@@ -97,9 +99,9 @@ export default function AgentChatScreen({
           onCtrlC={handleSwitchToAgentSelect}
         />
       )}
-      {agentEventState?.statusLine && (
+      {agentExecutionState?.statusLine && (
         <Box marginTop={1} borderStyle="single" borderLeft={false} borderRight={false} borderTop={false}>
-          <Text color="green">●</Text> <Text color="green">{agentEventState.statusLine}</Text>
+          <Text color="green">●</Text> <Text color="green">{agentExecutionState.statusLine}</Text>
         </Box>
       )}
     </Box>

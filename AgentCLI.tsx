@@ -4,14 +4,17 @@ import {
   HumanInterfaceResponseFor
 } from "@tokenring-ai/agent/HumanInterfaceRequest";
 import AgentManager from '@tokenring-ai/agent/services/AgentManager';
+import {AgentEventState} from "@tokenring-ai/agent/state/agentEventState";
+import {AgentExecutionState} from "@tokenring-ai/agent/state/agentExecutionState";
 import TokenRingApp from "@tokenring-ai/app";
+import {useAgentExecutionState} from "@tokenring-ai/chat-frontend/src/hooks/useAgentExecutionState";
 import {WebHostService} from "@tokenring-ai/web-host";
 import {Box, Text, useApp, useInput} from 'ink';
 import React, {useMemo, useState} from 'react';
 
 import {z} from "zod";
 import {InkCLIConfigSchema} from "./AgentInkCLI.ts";
-import {useAgentEvents} from './hooks/useAgentEvents.ts';
+import {useAgentStateSlice} from './hooks/useAgentStateSlice.ts';
 import AgentChatScreen from './screens/AgentChatScreen.tsx';
 import AgentSelectionScreen from './screens/AgentSelectionScreen.tsx';
 import AskScreen from "./screens/AskScreen.tsx";
@@ -62,7 +65,7 @@ export default function AgentCLI({
   const [screen, setScreen] = useState<Screen>({ name: 'selectAgent' });
 
   const currentAgent = useMemo(() => screen.name === 'chat' ? agentManager.getAgent(screen.agentId) : null, [screen, agentManager]);
-  const agentEventState = useAgentEvents(currentAgent);
+  const agentExecutionState = useAgentStateSlice(AgentExecutionState, currentAgent);
 
   if (screen.name === 'selectAgent' || currentAgent === null) {
     return (
@@ -77,8 +80,8 @@ export default function AgentCLI({
     );
   }
 
-  if (agentEventState?.waitingOn) {
-    const { id, request } = agentEventState.waitingOn;
+  if (agentExecutionState?.waitingOn && agentExecutionState.waitingOn.length > 0) {
+    const { id, request } = agentExecutionState.waitingOn[0];
     const handleResponse = (response: HumanInterfaceResponse) => {
       currentAgent.sendHumanResponse(id, response);
     }
@@ -117,7 +120,6 @@ export default function AgentCLI({
     <Box flexDirection="column">
       <Box borderStyle="round" paddingX={1}><Text color={bannerColor}>{bannerCompact}</Text></Box>
       <AgentChatScreen
-        agentEventState={agentEventState}
         currentAgent={currentAgent}
         setScreen={setScreen}
       />
