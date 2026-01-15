@@ -95,7 +95,7 @@ export default function AgentChatScreen({
           history={commandHistory}
           autoCompletion={availableCommands}
           onSubmit={handleCommandSubmit}
-          onCancel={() => currentAgent?.systemMessage('[Input cancelled]', 'warning')}
+          onCancel={() => currentAgent?.warningMessage('[Input cancelled]')}
           onCtrlC={handleSwitchToAgentSelect}
         />
       )}
