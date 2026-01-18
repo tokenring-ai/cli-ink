@@ -1,15 +1,16 @@
 import {TitledBox} from "@mishieck/ink-titled-box";
+import {type ParsedQuestionRequest} from "@tokenring-ai/agent/AgentEvents";
+import type {TreeLeaf} from '@tokenring-ai/agent/question';
 import AgentManager from '@tokenring-ai/agent/services/AgentManager';
+import TokenRingApp from "@tokenring-ai/app";
 import {WebHostService} from "@tokenring-ai/web-host";
 import SPAResource from "@tokenring-ai/web-host/SPAResource";
+import WorkflowService from "@tokenring-ai/workflow/WorkflowService";
 import {Box, Text} from "ink";
+import open from 'open';
 import React, {useCallback, useMemo} from 'react';
 import {Screen} from "../AgentCLI.tsx";
-import type {TreeLeaf} from './TreeSelectionScreen.tsx';
-import TreeSelectionScreen from './TreeSelectionScreen.tsx';
-import open from 'open';
-import TokenRingApp from "@tokenring-ai/app";
-import WorkflowService from "@tokenring-ai/workflow/WorkflowService";
+import QuestionInputScreen from './QuestionInputScreen.tsx';
 
 interface AgentSelectionScreenProps {
   app: TokenRingApp;
@@ -26,7 +27,7 @@ export default function AgentSelectionScreen({
   const webHostService = app.getService(WebHostService);
 
   const [err, setError] = React.useState<Error | null>(null);
-  const tree: TreeLeaf = useMemo(() => {
+  const tree: TreeLeaf[] = useMemo(() => {
     const configs = Object.entries(agentManager.getAgentConfigs());
     
     const categories: Record<string, TreeLeaf[]> = {};
@@ -80,16 +81,13 @@ export default function AgentSelectionScreen({
       }
     }
 
-    return {
-      name: 'Select Agent',
-      children: Object.entries(categories)
-        .filter(([_, agents]) => agents.length > 0)
-        .map(([category, agents]) => ({
-          name: category,
-          value: category,
-          children: agents.sort((a, b) => a.name.localeCompare(b.name)),
-        })),
-    };
+    return Object.entries(categories)
+      .filter(([_, agents]) => agents.length > 0)
+      .map(([category, agents]) => ({
+        name: category,
+        value: category,
+        children: agents.sort((a, b) => a.name.localeCompare(b.name)),
+      }));
   }, [agentManager, webHostService, app]);
 
   const handleSelect = useCallback(async (agentType: string | null) => {
@@ -113,7 +111,7 @@ export default function AgentSelectionScreen({
       if (!url) {
         setError(new Error('The web host service does not appear to be bound to a valid host/port.'));
       } else {
-        open(`${url}${remainder}`);
+        await open(`${url}${remainder}`);
       }
     } else if (action === 'workflow') {
       try {
@@ -127,10 +125,28 @@ export default function AgentSelectionScreen({
     }
   }, [agentManager, webHostService, setScreen, onCancel, app]);
 
+  const request: ParsedQuestionRequest = {
+    type: "question.request",
+    immediate: true,
+    timestamp: Date.now(),
+    requestId: "agent-selection",
+    message: "Select an agent to connect to or spawn:",
+    question: {
+      type: "treeSelect",
+      label: "Agent Selection",
+      minimumSelections: 1,
+      maximumSelections: 1,
+      defaultValue: [],
+      allowFreeform: false,
+      tree
+    },
+    autoSubmitAfter: 0
+  };
+
   return (
     <Box flexDirection="column">
-      <TreeSelectionScreen
-        request={{ type: 'askForSingleTreeSelection', title: "Agent Selection", tree }}
+      <QuestionInputScreen
+        request={request}
         onResponse={handleSelect}
       />
       { err &&

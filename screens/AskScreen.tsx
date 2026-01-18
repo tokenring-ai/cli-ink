@@ -1,10 +1,10 @@
-import {HumanInterfaceRequestFor, HumanInterfaceResponseFor} from "@tokenring-ai/agent/HumanInterfaceRequest";
+import {type ParsedQuestionRequest} from "@tokenring-ai/agent/AgentEvents";
 import {Box, Text, useInput} from 'ink';
 import React, {useState} from 'react';
 
 interface AskInputProps {
-  request: HumanInterfaceRequestFor<"askForText">;
-  onResponse: (response: HumanInterfaceResponseFor<"askForText">) => void;
+  request: ParsedQuestionRequest;
+  onResponse: (response: string) => void;
 }
 
 export default function AskScreen({ request, onResponse }: AskInputProps) {
@@ -15,7 +15,7 @@ export default function AskScreen({ request, onResponse }: AskInputProps) {
 
   useInput((input, key) => {
     if ((key.escape || input === 'q')) {
-      onResponse(null);
+      onResponse('');
       return;
     }
 

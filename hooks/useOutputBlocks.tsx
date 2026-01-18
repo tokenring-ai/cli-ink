@@ -1,5 +1,5 @@
 import {AgentEventState} from "@tokenring-ai/agent/state/agentEventState";
-import {useRef, useMemo} from "react";
+import {useMemo, useRef} from "react";
 
 export type OutputBlock =
   | { type: 'chat'; message: string }

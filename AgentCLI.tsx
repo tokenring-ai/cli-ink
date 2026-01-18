@@ -1,13 +1,7 @@
-import {
-  HumanInterfaceRequestFor,
-  HumanInterfaceResponse,
-  HumanInterfaceResponseFor
-} from "@tokenring-ai/agent/HumanInterfaceRequest";
+import {type ParsedQuestionRequest, QuestionResponseSchema} from "@tokenring-ai/agent/AgentEvents";
 import AgentManager from '@tokenring-ai/agent/services/AgentManager';
-import {AgentEventState} from "@tokenring-ai/agent/state/agentEventState";
 import {AgentExecutionState} from "@tokenring-ai/agent/state/agentExecutionState";
 import TokenRingApp from "@tokenring-ai/app";
-import {useAgentExecutionState} from "@tokenring-ai/chat-frontend/src/hooks/useAgentExecutionState";
 import {WebHostService} from "@tokenring-ai/web-host";
 import {Box, Text, useApp, useInput} from 'ink';
 import React, {useMemo, useState} from 'react';
@@ -17,22 +11,12 @@ import {InkCLIConfigSchema} from "./AgentInkCLI.ts";
 import {useAgentStateSlice} from './hooks/useAgentStateSlice.ts';
 import AgentChatScreen from './screens/AgentChatScreen.tsx';
 import AgentSelectionScreen from './screens/AgentSelectionScreen.tsx';
-import AskScreen from "./screens/AskScreen.tsx";
-import ConfirmationScreen from './screens/ConfirmationScreen.tsx';
-import PasswordScreen from './screens/PasswordScreen.tsx';
-import TreeSelectionScreen from './screens/TreeSelectionScreen.tsx';
-import WebPageScreen from './screens/WebPageScreen.tsx';
-
+import QuestionInputScreen from './screens/QuestionInputScreen.tsx';
 
 export type Screen =
   | { name: 'selectAgent' }
   | { name: 'chat'; agentId: string }
-  | { name: 'askForConfirmation'; request: HumanInterfaceRequestFor<"askForConfirmation">, onResponse: (response: HumanInterfaceResponseFor<'askForConfirmation'>) => void }
-  | { name: 'askForPassword'; request: HumanInterfaceRequestFor<"askForPassword">, onResponse: (response: HumanInterfaceResponseFor<'askForPassword'>) => void }
-  | { name: 'openWebPage'; request: HumanInterfaceRequestFor<"openWebPage">, onResponse: (response: HumanInterfaceResponseFor<'openWebPage'>) => void }
-  | { name: 'askForSingleTreeSelection'; request: HumanInterfaceRequestFor<"askForSingleTreeSelection">, onResponse: (response: HumanInterfaceResponseFor<'askForSingleTreeSelection'>) => void }
-  | { name: 'askForMultipleTreeSelection'; request: HumanInterfaceRequestFor<"askForMultipleTreeSelection">, onResponse: (response: HumanInterfaceResponseFor<'askForMultipleTreeSelection'>) => void }
-  | { name: 'askForText'; request: HumanInterfaceRequestFor<"askForText">, onResponse: (response: HumanInterfaceResponseFor<'askForText'>) => void };
+  | { name: 'question'; request: ParsedQuestionRequest, onResponse: (response: any) => void };
 
 
 interface AgentCLIProps extends z.infer<typeof InkCLIConfigSchema> {
@@ -81,37 +65,15 @@ export default function AgentCLI({
   }
 
   if (agentExecutionState?.waitingOn && agentExecutionState.waitingOn.length > 0) {
-    const { id, request } = agentExecutionState.waitingOn[0];
-    const handleResponse = (response: HumanInterfaceResponse) => {
-      currentAgent.sendHumanResponse(id, response);
+    const request = agentExecutionState.waitingOn[0];
+    const handleResponse = (response: z.output<typeof QuestionResponseSchema>) => {
+      currentAgent.sendQuestionResponse(request.requestId, { result: response });
+
     }
     return (
       <Box flexDirection="column">
         <Box borderStyle="round" paddingX={1}><Text color={bannerColor}>{bannerCompact}</Text></Box>
-        {request.type === 'askForConfirmation' && (
-          <ConfirmationScreen message={request.message} defaultValue={request.default} timeout={request.timeout} onConfirm={handleResponse} />
-        )}
-        {request.type === 'askForPassword' && (
-          <PasswordScreen request={request} onResponse={handleResponse} />
-        )}
-        {request.type === 'openWebPage' && (
-          <WebPageScreen request={request} onResponse={handleResponse} />
-        )}
-        {(request.type === 'askForSingleTreeSelection') && (
-          <TreeSelectionScreen
-            request={request}
-            onResponse={handleResponse}
-          />
-        )}
-        {(request.type === 'askForMultipleTreeSelection') && (
-          <TreeSelectionScreen
-            request={request}
-            onResponse={handleResponse}
-          />
-        )}
-        {(request.type === 'askForText') && (
-          <AskScreen request={request} onResponse={handleResponse} />
-        )}
+        <QuestionInputScreen request={request} onResponse={handleResponse} />
       </Box>
     );
   }
