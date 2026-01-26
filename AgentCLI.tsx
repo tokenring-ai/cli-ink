@@ -26,7 +26,6 @@ interface AgentCLIProps extends z.infer<typeof InkCLIConfigSchema> {
 
 export default function AgentCLI({
   app,
-  bannerNarrow,
   bannerWide,
   bannerCompact,
   bannerColor
@@ -34,7 +33,6 @@ export default function AgentCLI({
   const { exit } = useApp();
 
   const agentManager = useMemo(() => app.requireService(AgentManager), [app]);
-  const webHostService = useMemo(() => app.getService(WebHostService), [app]);
   
   useInput((input, key) => {
     if (key.ctrl && input === 'c') {
