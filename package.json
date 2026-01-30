@@ -4,7 +4,7 @@
   "version": "0.2.0",
   "dependencies": {
     "@inquirer/prompts": "^8.2.0",
-    "@mishieck/ink-titled-box": "^0.3.0",
+    "@mishieck/ink-titled-box": "^0.4.2",
     "@tokenring-ai/agent": "0.2.0",
     "@tokenring-ai/app": "0.2.0",
     "@tokenring-ai/utility": "0.2.0",
