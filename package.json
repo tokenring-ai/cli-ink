@@ -19,13 +19,13 @@
     "ink-text-input": "^6.0.0",
     "marked": "^17.0.1",
     "open": "^11.0.0",
-    "react": "catalog:",
-    "zod": "catalog:"
+    "react": "^19.2.4",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "typescript": "catalog:",
-    "@types/react": "catalog:",
-    "vitest": "catalog:"
+    "typescript": "^5.9.3",
+    "@types/react": "^19.2.10",
+    "vitest": "^4.0.18"
   },
   "exports": {
     ".": "./index.ts",
