@@ -17,12 +17,7 @@ export default class AgentInkCLI implements TokenRingService {
   name = 'AgentInkCLI';
   description = 'Ink-based CLI for interacting with agents';
 
-  private readonly app: TokenRingApp;
-  private readonly config: z.infer<typeof InkCLIConfigSchema>;
-
-  constructor(app: TokenRingApp, config: z.infer<typeof InkCLIConfigSchema>) {
-    this.app = app;
-    this.config = config;
+  constructor(private readonly app: TokenRingApp, private readonly config: z.infer<typeof InkCLIConfigSchema>) {
   }
 
   async run(): Promise<void> {
