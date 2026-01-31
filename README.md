@@ -122,7 +122,7 @@ export const InkCLIConfigSchema = z.object({
 **Navigation:**
 - `Up/Down Arrow` - Navigate lists and command history
 - `Tab` - Auto-complete commands
-- `Left/Right Arrow` - Expand/collapse tree nodes
+- `Left/Right Arrow` - Expand/collapse tree nodes (for tree selection screens)
 - `Space` - Toggle selections (multiple choice)
 - `Enter` - Select/submit
 - `Esc` or `q` - Cancel/cancel selection
@@ -133,56 +133,12 @@ The CLI handles various types of human interface requests:
 
 | Request Type | Description |
 |--------------|-------------|
-| `askForText` | Open editor for multi-line responses (Ctrl+D to submit) |
-| `askForConfirmation` | Yes/no prompts with timeout support |
-| `askForSingleTreeSelection` | Single choice from hierarchical tree structure |
-| `askForMultipleTreeSelection` | Multiple selections from hierarchical tree |
-| `askForPassword` | Secure input prompts |
-| `openWebPage` | Launch URLs in browser |
-
-## API Reference
-
-### AgentInkCLI Service
-
-Main service class implementing the CLI functionality.
-
-```typescript
-export default class AgentInkCLI implements TokenRingService {
-  name = 'AgentInkCLI';
-  description = 'Ink-based CLI for interacting with agents';
-
-  constructor(app: TokenRingApp, config: z.infer<typeof InkCLIConfigSchema>);
-
-  async run(): Promise<void>;
-}
-```
-
-### AgentCLI Component
-
-Main component that manages screen state and rendering.
-
-```typescript
-interface AgentCLIProps extends z.infer<typeof InkCLIConfigSchema> {
-  agentManager: AgentManager;
-  app: TokenRingApp;
-}
-
-export default function AgentCLI(props: AgentCLIProps);
-```
-
-### Screen Types
-
-```typescript
-type Screen =
-  | { name: 'selectAgent' }
-  | { name: 'chat'; agentId: string }
-  | { name: 'askForConfirmation'; request: HumanInterfaceRequestFor<"askForConfirmation">, onResponse: (response: HumanInterfaceResponseFor<'askForConfirmation'>) => void }
-  | { name: 'askForPassword'; request: HumanInterfaceRequestFor<"askForPassword">, onResponse: (response: HumanInterfaceResponseFor<'askForPassword'>) => void }
-  | { name: 'openWebPage'; request: HumanInterfaceRequestFor<"openWebPage">, onResponse: (response: HumanInterfaceResponseFor<'openWebPage'>) => void }
-  | { name: 'askForSingleTreeSelection'; request: HumanInterfaceRequestFor<"askForSingleTreeSelection">, onResponse: (response: HumanInterfaceResponseFor<'askForSingleTreeSelection'>) => void }
-  | { name: 'askForMultipleTreeSelection'; request: HumanInterfaceRequestFor<"askForMultipleTreeSelection">, onResponse: (response: HumanInterfaceResponseFor<'askForMultipleTreeSelection'>) => void }
-  | { name: 'askForText'; request: HumanInterfaceRequestFor<"askForText">, onResponse: (response: HumanInterfaceResponseFor<'askForText'>) => void };
-```
+| `askForConfirmation` | Yes/no prompts with timeout support (ConfirmationScreen) |
+| `askForPassword` | Secure input prompts (implemented via text input with masking) |
+| `askForText` | Open editor for multi-line responses (AskScreen/QuestionInputScreen) |
+| `askForSingleTreeSelection` | Single choice from hierarchical tree structure (QuestionInputScreen) |
+| `askForMultipleTreeSelection` | Multiple selections from hierarchical tree (QuestionInputScreen) |
+| `openWebPage` | Launch URLs in browser (via QuestionInputScreen with 'open:' prefix) |
 
 ## Package Structure
 
@@ -194,26 +150,144 @@ pkg/cli-ink/
 ├── AgentCLI.tsx                # Core component managing screen state
 ├── components/                 # Reusable components
 │   ├── CommandInput.tsx        # Command input with history and auto-completion
-│   ├── SelectInput.tsx         # Selection input component
-│   └── Markdown.tsx            # Markdown rendering with syntax highlighting
+│   ├── Markdown.tsx            # Markdown rendering with syntax highlighting
+│   └── SelectInput.tsx         # Selection input component
 ├── hooks/                      # Custom hooks
-│   ├── useAgentEvents.ts       # Agent event state management
-│   ├── useOutputBlocks.ts      # Output block processing
+│   ├── useAgentStateSlice.ts   # Agent event state management
+│   ├── useOutputBlocks.tsx     # Output block processing
 │   └── useScreenSize.ts        # Terminal size management
 ├── screens/                    # Screen components
 │   ├── AgentChatScreen.tsx     # Agent chat interface
 │   ├── AgentSelectionScreen.tsx # Agent selection interface
 │   ├── AskScreen.tsx           # Text input screen
 │   ├── ConfirmationScreen.tsx  # Confirmation prompt screen
-│   ├── PasswordScreen.tsx      # Password input screen
-│   ├── TreeSelectionScreen.tsx # Tree-based selection
-│   └── WebPageScreen.tsx       # Web page opening screen
+│   └── QuestionInputScreen.tsx # Generic question input (handles text, treeSelect, fileSelect)
 ├── markdown.sample.md          # Markdown rendering sample
 ├── package.json
 ├── tsconfig.json
 ├── vitest.config.ts
 └── README.md
 ```
+
+### Component: AgentChatScreen
+
+Main chat interface displaying agent responses, reasoning, and system messages.
+
+**Features:**
+- Displays chat messages, reasoning process, and system notifications
+- Shows agent execution status with spinner
+- Supports markdown rendering with syntax highlighting
+- Command input with history and auto-completion
+- `/switch` command to return to agent selection
+
+### Component: AgentSelectionScreen
+
+Menu for selecting agents to connect to or spawn.
+
+**Categories:**
+- Agent types grouped by category
+- Web Applications (connect to SPA resources)
+- Current Agents (running agents)
+- Workflows (spawning workflow-based agents)
+
+### Component: QuestionInputScreen
+
+Generic screen for handling various question types from agents.
+
+**Supported Question Types:**
+- Text input (multi-line)
+- Tree selection (single or multiple)
+- File selection (placeholder - not fully implemented)
+
+### Component: ConfirmationScreen
+
+Confirmation prompt with timeout support.
+
+**Features:**
+- Yes/No toggle with left/right arrow keys
+- Visual feedback for selection
+- Countdown timer for timeout
+
+### Component: AskScreen
+
+Multi-line text input screen for agent questions.
+
+**Features:**
+- Multi-line text editing
+- Ctrl+D to submit
+- Esc or q to cancel
+- Cursor position indicator
+
+### Component: CommandInput
+
+Enhanced command input component with history and auto-completion.
+
+**Features:**
+- Command history navigation with up/down arrows
+- Auto-completion with tab key
+- Ctrl+C handling
+- Escape key support
+
+### Component: Markdown
+
+Markdown renderer with syntax highlighting.
+
+**Supported Features:**
+- Text formatting (bold, italic, strikethrough)
+- Code blocks with syntax highlighting
+- Tables
+- Lists (ordered, unordered, checkboxes)
+- Blockquotes
+- Headers
+- Links and images
+- Horizontal rules
+
+### Hook: useAgentStateSlice
+
+Subscribe to agent state slices for real-time updates.
+
+**Parameters:**
+- `ClassType`: AgentStateSlice class to subscribe to
+- `agent`: Agent instance or null
+
+**Returns:**
+- State slice data or null
+
+### Hook: useOutputBlocks
+
+Process agent event state into display blocks.
+
+**Output Types:**
+- `chat`: Chat messages from agent
+- `reasoning`: Agent reasoning process
+- `input`: User input echo
+- `system`: System messages (info, warning, error)
+
+**Note:** This hook is available in the codebase but not currently used in the component implementation.
+
+### Hook: useScreenSize
+
+Track terminal window size.
+
+**Returns:**
+- Object with `rows` and `columns` dimensions
+
+## Screens
+
+### Screen Types
+
+```typescript
+type Screen =
+  | { name: 'selectAgent' }
+  | { name: 'chat'; agentId: string }
+  | { name: 'question'; request: ParsedQuestionRequest, onResponse: (response: any) => void };
+```
+
+### Screen Flow
+
+1. **selectAgent**: Initial screen showing agent selection menu
+2. **chat**: Active chat interface with selected agent
+3. **question**: Interactive request from agent (confirmation, text input, selections)
 
 ## Event Handling
 
@@ -271,6 +345,15 @@ The CLI processes various agent events in real-time:
 # Workflows are listed in the agent selection screen
 # and can be spawned as agents
 ```
+
+### Handling Agent Questions
+
+When an agent requires human input, the CLI automatically shows the appropriate screen:
+
+- **Confirmation**: Toggle Yes/No with arrow keys, Enter to confirm
+- **Text Input**: Type multi-line response, Ctrl+D to submit
+- **Tree Selection**: Navigate tree with arrows, Enter to select
+- **Web Page**: Click link to open in browser
 
 ## Development
 
